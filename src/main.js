@@ -43,6 +43,10 @@ setupPage();
 // =====================================================
 // PAGE 1 -> PAGE 2: create event
 // =====================================================
+function getBrowserTimezone() {
+  // returns the timezone name the browser is using, e.g. "Africa/Cairo"
+  return Intl.DateTimeFormat().resolvedOptions().timeZone;
+}
 
 async function onCreateSubmitClicked() {
   // read what the user typed
@@ -50,10 +54,7 @@ async function onCreateSubmitClicked() {
   appState.startDate = document.getElementById("start-date-input").value;
   appState.endDate = document.getElementById("end-date-input").value;
 
-  // PLACEHOLDER: check the fields are filled and end date is not before start date.
-  // If something is wrong, show a message and stop here.
-
-  let success = await saveEventToDatabase(appState.eventName, appState.startDate, appState.endDate);
+  const success = await saveEventToDatabase(appState.eventName, appState.startDate, appState.endDate);
 
   if (success) {
     appState.allSlotTimes = generateEventSlotTimes(appState.startDate, appState.endDate);
@@ -66,7 +67,7 @@ async function onCreateSubmitClicked() {
 }
 
 async function saveEventToDatabase(eventName, startDate, endDate) {
-  const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const userTimezone = getBrowserTimezone();
 
   // The names on the left of the colons must match the argument names in the function.
   var response = await supabase.rpc("create_event", {
@@ -89,7 +90,6 @@ async function saveEventToDatabase(eventName, startDate, endDate) {
   }
 
   appState.eventId = response.data;
-  // console.log("Saved! The function returned: ", response.data);
   return true;
 }
 
@@ -111,7 +111,6 @@ function generateEventSlotTimes(startDate, endDate) {
   return slotTimes;
 }
 
-
 // =====================================================
 // PAGE 2: timezone dropdown
 // =====================================================
@@ -130,21 +129,18 @@ function populateTimezoneDropdown() {
   }
 }
 
-function getBrowserTimezone() {
-  // returns the timezone name the browser is using, e.g. "Africa/Cairo"
-  return Intl.DateTimeFormat().resolvedOptions().timeZone;
-}
-
-
 // =====================================================
 // PAGE 2 -> PAGE 3: log in
 // =====================================================
 
-function onLoginSubmitClicked() {
+async function onLoginSubmitClicked() {
   var typedName = document.getElementById("username-input").value;
   var chosenTimezone = document.getElementById("timezone-select").value;
 
-  // PLACEHOLDER: make sure name is not empty
+  if (typedName === "") {
+    document.querySelector(".login-error-message").innerHTML = 'Username cannot be empty.';
+    return;
+  }
 
   if (chosenTimezone === "") {
     chosenTimezone = getBrowserTimezone();   // "leave empty for auto detect"
@@ -155,8 +151,17 @@ function onLoginSubmitClicked() {
     timezone: chosenTimezone
   };
 
-  // PLACEHOLDER: tell the server this user joined the event (create the user in database).
   // If the user already exists, load their old availability into appState.selectedLookup.
+  var response = await supabase.rpc("get_user_avail", {
+    p_username: appState.currentUser.name,
+    p_eid: appState.eventId,
+    p_tzinfo: appState.currentUser.timezone
+  });
+
+  if (response.error !== null) {
+    console.log('Failed: ' + response.error);
+  }
+  console.log('Success:\n' + response.data);
 
   showLoggedInState();
 }
@@ -178,7 +183,6 @@ function showLoggedInState() {
   var spanViewElement = document.getElementById("input-span-view");
   buildSpanView(spanViewElement, user.timezone, appState.selectedLookup, true, false);
 }
-
 
 // =====================================================
 // TIME HELPERS
@@ -352,9 +356,6 @@ function onSlotClicked(clickEvent) {
 // =====================================================
 // PAGE 3 -> PAGE 4: submit availability
 // =====================================================
-
-// "async" means this function is allowed to wait for slow things (like the database)
-// using the word "await" inside it.
 async function onAvailabilitySubmitClicked() {
   var selectedSlotTimes = [];
 
@@ -362,7 +363,6 @@ async function onAvailabilitySubmitClicked() {
     selectedSlotTimes.push(Number(key));
   }
 
-  // "await" pauses here until the database has answered
   await saveAvailabilityToDatabase(appState.currentUser, selectedSlotTimes);
 
   loadAllUsersFromDatabase();
@@ -370,19 +370,6 @@ async function onAvailabilitySubmitClicked() {
 }
 
 async function saveAvailabilityToDatabase(user, slotTimes) {
-  // EXAMPLE of calling a plpgsql (Postgres) function from supabase.
-  //
-  // Imagine the database has a function like this:
-  //
-  //   create function submit_availability(
-  //     p_event_id uuid,
-  //     p_user_name text,
-  //     p_timezone text,
-  //     p_slot_times bigint[]
-  //   ) returns void ...
-  //
-  // supabase.rpc("function name", {an object with the function's arguments})
-  // The names on the left of the colons must match the argument names in the function.
   var response = await supabase.rpc("submit_availability", {
     p_event_id: appState.eventId,
     p_user_name: user.name,
