@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Watchparty Scheduler</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ========== PAGE 1: create event (image 1) ========== -->
+  <div id="view-create">
+    <h1>Create an event</h1>
+
+    <div class="form-row">
+      <label for="event-name-input">Event Name</label>
+      <input type="text" id="event-name-input">
+    </div>
+
+    <div class="form-row">
+      <label for="start-date-input">Start Date</label>
+      <input type="date" id="start-date-input">
+    </div>
+
+    <div class="form-row">
+      <label for="end-date-input">End Date</label>
+      <input type="date" id="end-date-input">
+    </div>
+
+    <button id="create-submit-button">SUBMIT</button>
+
+    <p>
+      Choose start and end date with respect to your time zone inclusively
+      (e.g. if event can start at 9PM oct 23 and end at 3AM oct 24 your time,
+      pick oct 23 as start and oct 24 as end date)
+    </p>
+  </div>
+
+
+  <!-- ========== PAGES 2, 3, 4: the event page ========== -->
+  <div id="view-event" class="hidden">
+
+    <h1 id="event-title"></h1>
+
+    <!-- availability box: shown in all 3 states.
+         image 2 and 3: shows the empty message
+         image 4: shows one row per user who submitted -->
+    <div id="availability-box">
+      <p id="no-availability-message">No availability added yet</p>
+      <div id="availability-rows"></div>
+    </div>
+
+    <!-- image 2: user not logged in yet -->
+    <div id="login-section">
+      <div class="form-row">
+        <label for="username-input">Name</label>
+        <input type="text" id="username-input">
+      </div>
+
+      <div class="form-row">
+        <label for="timezone-select">
+          Timezone <small>(leave empty for auto detect)</small>
+        </label>
+        <select id="timezone-select">
+          <option value="">-- auto detect --</option>
+          <!-- other options are added by populateTimezoneDropdown() -->
+        </select>
+      </div>
+
+      <button id="login-submit-button">SUBMIT</button>
+    </div>
+
+    <!-- image 3 and 4: user is logged in, this is their editable row -->
+    <div id="input-section" class="hidden">
+      <p>Click to choose your available time slot</p>
+
+      <div class="user-row">
+        <div class="user-info-cell" id="input-tz-offset"></div>
+        <div class="user-info-cell" id="input-tz-name"></div>
+        <div class="user-info-cell" id="input-username"></div>
+        <div class="user-info-cell" id="input-local-time"></div>
+        <div class="span-view" id="input-span-view"></div>
+      </div>
+
+      <button id="availability-submit-button">SUBMIT</button>
+    </div>
+
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

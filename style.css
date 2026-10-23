@@ -1,0 +1,99 @@
+body {
+  font-family: sans-serif;
+}
+
+h1 {
+  text-align: center;
+}
+
+.hidden {
+  display: none;
+}
+
+.form-row {
+  margin-bottom: 15px;
+}
+
+.form-row label {
+  display: inline-block;
+  width: 150px;
+  text-align: right;
+  margin-right: 10px;
+}
+
+/* ---------- availability box (top grey area) ---------- */
+#availability-box {
+  border: 1px solid gray;
+  background: #eee;
+  min-height: 150px;
+  padding: 10px;
+  margin-bottom: 30px;
+}
+
+#no-availability-message {
+  text-align: center;
+  margin-top: 60px;
+}
+
+/* ---------- one row per user ---------- */
+.user-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.user-info-cell {
+  margin-right: 20px;
+  min-width: 80px;
+}
+
+/* ---------- the horizontally scrollable span view ---------- */
+.span-view {
+  flex: 1;
+  overflow-x: scroll;     /* gives us the bottom slide bar */
+  border: 1px solid gray;
+  border-radius: 10px;
+  padding: 5px;
+}
+
+.span-track {
+  display: flex;
+  width: max-content;
+}
+
+.slot-column {
+  width: 70px;
+}
+
+.slot-label {
+  height: 20px;
+  font-size: 14px;
+}
+
+.slot-box {
+  height: 60px;
+  border: 1px solid gray;
+  box-sizing: border-box;
+  font-size: 12px;
+}
+
+/* the 00:00 line is thicker than the others */
+.slot-box.midnight {
+  border-left: 4px solid black;
+}
+
+.slot-box.selected {
+  background: limegreen;
+}
+
+/* editable boxes show a pointer, read only ones do not */
+.span-view.editable .slot-box {
+  cursor: pointer;
+}
+
+/* the box that marks the current real time 30 min window */
+.slot-box.current-window {
+  outline: 3px solid black;
+  outline-offset: -3px;
+  border-radius: 6px;
+}
