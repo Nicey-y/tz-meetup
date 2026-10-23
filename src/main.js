@@ -260,6 +260,26 @@ function getCurrentWindowStartTime() {
   return Math.floor(now / HALF_HOUR_IN_MS) * HALF_HOUR_IN_MS;
 }
 
+function convertMillisecondsToTimestamptz(utcMilliseconds) {
+  // 1761260400000 -> "2026-10-23T23:00:00.000Z"
+  // Postgres accepts this text for a timestamptz column or parameter
+  var dateObject = new Date(utcMilliseconds);
+  return dateObject.toISOString();
+}
+
+function convertTimestamptzToMilliseconds(timestamptzText) {
+  // "2026-10-23T23:00:00+00:00" -> 1761260400000
+  // Supabase sends timestamptz back as text, so use this when loading data
+  return new Date(timestamptzText).getTime();
+}
+
+function convertSlotListToTimestamptzList(slotTimes) {
+  var result = [];
+  for (var i = 0; i < slotTimes.length; i++) {
+    result.push(convertMillisecondsToTimestamptz(slotTimes[i]));
+  }
+  return result;
+}
 
 // =====================================================
 // THE SPAN VIEW (the scrollable row of 30 min boxes)
@@ -353,6 +373,18 @@ function onSlotClicked(clickEvent) {
 // =====================================================
 // PAGE 3 -> PAGE 4: submit availability
 // =====================================================
+
+// Helper to unpack user info from querying for all users of an event
+// userObj = {username: str, tzinfo: str, list_slot_starts: [str]}
+function unpackUserInfo(userObj) {
+  var selectedSlotTimes = userObj.list_slot_starts.map(convertTimestamptzToMilliseconds);
+
+  return {
+    name: userObj.username,
+    timezone: userObj.tzinfo,
+    slotTimes: selectedSlotTimes
+  };
+}
 async function onAvailabilitySubmitClicked() {
   var selectedSlotTimes = [];
 
@@ -362,45 +394,45 @@ async function onAvailabilitySubmitClicked() {
 
   await saveAvailabilityToDatabase(appState.currentUser, selectedSlotTimes);
 
-  loadAllUsersFromDatabase();
+  await loadAllUsersFromDatabase();
   refreshAvailabilityBox();
 }
 
 async function saveAvailabilityToDatabase(user, slotTimes) {
-  var response = await supabase.rpc("submit_availability", {
-    p_event_id: appState.eventId,
-    p_user_name: user.name,
-    p_timezone: user.timezone,
-    p_slot_times: slotTimes
+  var timestamptzList = convertSlotListToTimestamptzList(slotTimes);
+
+  var response = await supabase.rpc("update_user_avail", {
+    p_username: user.name,
+    p_eid: appState.eventId,
+    p_tzinfo: user.timezone,
+    p_timestamps: timestamptzList
   });
 
-  // supabase always answers with an object that has two parts:
-  // "error" (empty when everything worked) and "data" (whatever the function returned)
   if (response.error !== null) {
     console.log("Saving failed: " + response.error.message);
-    // PLACEHOLDER: show an error message on the page so the user knows it failed
+    document.querySelector('.submit-availability-error-message').innerHTML = response.error.message;
     return;
   }
-
+  // response.data = [{start_time: 'date string ISO'}, ...]
   console.log("Saved! The function returned: ", response.data);
 }
 
-function loadAllUsersFromDatabase() {
-  // PLACEHOLDER: ask the server for every user of this event and their slot times,
-  // then store the answer in appState.allUsers.
-  // For now we only fake it with the current user so the page can be tested.
-  var selectedSlotTimes = [];
-  for (var key in appState.selectedLookup) {
-    selectedSlotTimes.push(Number(key));
+async function loadAllUsersFromDatabase() {
+  var response = await supabase.rpc("get_event_users", {
+    p_eid: appState.eventId
+  });
+
+  if (response.error !== null) {
+    console.log("Fetch event's users failed: " + response.error.message);
+    document.querySelector('.submit-availability-error-message').innerHTML = response.error.message;
+    return;
   }
 
-  appState.allUsers = [
-    {
-      name: appState.currentUser.name,
-      timezone: appState.currentUser.timezone,
-      slotTimes: selectedSlotTimes
-    }
-  ];
+  // response.data = [{ , ,list_slot_starts: (4) ['2026-10-23T13:00:00+00:00',...]}]
+  console.log('get_event_users responses: ', response.data);
+
+  // Save users' info and their availability
+  appState.allUsers = response.data.map(unpackUserInfo);
 }
 
 function refreshAvailabilityBox() {
