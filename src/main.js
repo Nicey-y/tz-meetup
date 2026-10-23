@@ -1,3 +1,6 @@
+// "import" pulls in the supabase connection from the other file
+import { supabase } from "./supabaseClient.js";
+
 // =====================================================
 // GLOBAL DATA
 // =====================================================
@@ -6,6 +9,7 @@ var HALF_HOUR_IN_MS = 30 * 60 * 1000;
 
 // everything the page needs to remember lives in this one object
 var appState = {
+  eventId: null,            // id of the event row in the database (comes from the URL or from creating the event)
   eventName: "",
   startDate: "",            // "2026-10-23" (creator's timezone)
   endDate: "",              // "2026-10-24" (creator's timezone)
@@ -325,23 +329,52 @@ function onSlotClicked(clickEvent) {
 // PAGE 3 -> PAGE 4: submit availability
 // =====================================================
 
-function onAvailabilitySubmitClicked() {
+// "async" means this function is allowed to wait for slow things (like the database)
+// using the word "await" inside it.
+async function onAvailabilitySubmitClicked() {
   var selectedSlotTimes = [];
 
   for (var key in appState.selectedLookup) {
     selectedSlotTimes.push(Number(key));
   }
 
-  saveAvailabilityToDatabase(appState.currentUser, selectedSlotTimes);
+  // "await" pauses here until the database has answered
+  await saveAvailabilityToDatabase(appState.currentUser, selectedSlotTimes);
 
   loadAllUsersFromDatabase();
   refreshAvailabilityBox();
 }
 
-function saveAvailabilityToDatabase(user, slotTimes) {
-  // PLACEHOLDER: send the user's name, timezone and list of selected slot times
-  // (UTC milliseconds) to the server. If this user already submitted before,
-  // the server replaces their old availability with this new list.
+async function saveAvailabilityToDatabase(user, slotTimes) {
+  // EXAMPLE of calling a plpgsql (Postgres) function from supabase.
+  //
+  // Imagine the database has a function like this:
+  //
+  //   create function submit_availability(
+  //     p_event_id uuid,
+  //     p_user_name text,
+  //     p_timezone text,
+  //     p_slot_times bigint[]
+  //   ) returns void ...
+  //
+  // supabase.rpc("function name", {an object with the function's arguments})
+  // The names on the left of the colons must match the argument names in the function.
+  var response = await supabase.rpc("submit_availability", {
+    p_event_id: appState.eventId,
+    p_user_name: user.name,
+    p_timezone: user.timezone,
+    p_slot_times: slotTimes
+  });
+
+  // supabase always answers with an object that has two parts:
+  // "error" (empty when everything worked) and "data" (whatever the function returned)
+  if (response.error !== null) {
+    console.log("Saving failed: " + response.error.message);
+    // PLACEHOLDER: show an error message on the page so the user knows it failed
+    return;
+  }
+
+  console.log("Saved! The function returned: ", response.data);
 }
 
 function loadAllUsersFromDatabase() {
