@@ -137,11 +137,6 @@ async function onLoginSubmitClicked() {
   var typedName = document.getElementById("username-input").value;
   var chosenTimezone = document.getElementById("timezone-select").value;
 
-  if (typedName === "") {
-    document.querySelector(".login-error-message").innerHTML = 'Username cannot be empty.';
-    return;
-  }
-
   if (chosenTimezone === "") {
     chosenTimezone = getBrowserTimezone();   // "leave empty for auto detect"
   }
@@ -159,9 +154,11 @@ async function onLoginSubmitClicked() {
   });
 
   if (response.error !== null) {
-    console.log('Failed: ' + response.error);
+    console.log('Failed at log in: ' + response.error.message);
+    document.querySelector(".login-error-message").innerHTML = response.error.message;
+    return;
   }
-  console.log('Success:\n' + response.data);
+  console.log('Success at log in:\n' + response.data);
 
   showLoggedInState();
 }
