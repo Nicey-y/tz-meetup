@@ -44,7 +44,7 @@ setupPage();
 // PAGE 1 -> PAGE 2: create event
 // =====================================================
 
-function onCreateSubmitClicked() {
+async function onCreateSubmitClicked() {
   // read what the user typed
   appState.eventName = document.getElementById("event-name-input").value;
   appState.startDate = document.getElementById("start-date-input").value;
@@ -53,20 +53,44 @@ function onCreateSubmitClicked() {
   // PLACEHOLDER: check the fields are filled and end date is not before start date.
   // If something is wrong, show a message and stop here.
 
-  saveEventToDatabase(appState.eventName, appState.startDate, appState.endDate);
+  let success = await saveEventToDatabase(appState.eventName, appState.startDate, appState.endDate);
 
-  appState.allSlotTimes = generateEventSlotTimes(appState.startDate, appState.endDate);
+  if (success) {
+    appState.allSlotTimes = generateEventSlotTimes(appState.startDate, appState.endDate);
 
-  // switch screens
-  document.getElementById("view-create").classList.add("hidden");
-  document.getElementById("view-event").classList.remove("hidden");
-  document.getElementById("event-title").textContent = appState.eventName;
+    // switch screens
+    document.getElementById("view-create").classList.add("hidden");
+    document.getElementById("view-event").classList.remove("hidden");
+    document.getElementById("event-title").textContent = appState.eventName;
+  }
 }
 
-function saveEventToDatabase(eventName, startDate, endDate) {
-  // PLACEHOLDER: send the event name, start date and end date to the server
-  // so it is stored in the database. The server should reply with an event id
-  // that we can put in the page URL so other people can open the same event.
+async function saveEventToDatabase(eventName, startDate, endDate) {
+  const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+  // The names on the left of the colons must match the argument names in the function.
+  var response = await supabase.rpc("create_event", {
+    p_event_name: eventName,
+    p_start: startDate,
+    p_end: endDate,
+    p_tzinfo: userTimezone
+  });
+
+  // supabase always answers with an object that has two parts:
+  // "error" (empty when everything worked) and "data" (whatever the function returned)
+  if (response.error !== null) {
+    console.log("Saving failed: " + response.error.message);
+    if (response.error.message.includes("event_name_length")) {
+      document.querySelector(".error-message").innerHTML = 'Event name must have between 1 and 50 characters.';
+    } else {
+      document.querySelector(".error-message").innerHTML = response.error.message;
+    }
+    return false;
+  }
+
+  appState.eventId = response.data;
+  // console.log("Saved! The function returned: ", response.data);
+  return true;
 }
 
 function generateEventSlotTimes(startDate, endDate) {
