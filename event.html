@@ -6,14 +6,14 @@
   <link rel="stylesheet" href="/src/style.css">
 </head>
 <body>
-  <!-- ========== PAGES 2, 3, 4: the event page ========== -->
+  <!-- ========== VIEW 2, 3, 4: the event page ========== -->
   <div id="view-event" class="hidden">
 
     <h1 id="event-title"></h1>
 
     <!-- availability box: shown in all 3 states.
-         image 2 and 3: shows the empty message
-         image 4: shows one row per user who submitted -->
+      view 2 and 3: shows the empty message
+      view 4: shows one row per user who submitted -->
     <div id="availability-box">
       <p id="no-availability-message">No availability added yet</p>
       <div id="availability-grid">
@@ -24,7 +24,7 @@
       </div>
     </div>
 
-    <!-- image 2: user not logged in yet -->
+    <!-- view 2: user not logged in yet -->
     <div id="login-section">
       <div class="form-row">
         <label for="username-input">Name</label>
@@ -46,7 +46,7 @@
       <button id="login-submit-button">SUBMIT</button>
     </div>
 
-    <!-- image 3 and 4: user is logged in, this is their editable row -->
+    <!-- view 3 and 4: user is logged in, this is their editable row -->
     <div id="input-section" class="hidden">
       <p>Click to choose your available time slot</p>
 

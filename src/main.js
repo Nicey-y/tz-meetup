@@ -12,7 +12,7 @@ setupPage();
 
 
 // =====================================================
-// PAGE 1 -> PAGE 2: create event
+// VIEW 1 -> VIEW 2: create event
 // =====================================================
 
 async function onCreateSubmitClicked() {

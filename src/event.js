@@ -1,5 +1,5 @@
 import { getUtcOffsetLabel, formatLocalTimeAndDate, getCurrentWindowStartTime, getBrowserTimezone, buildSpanView } from "./shared_helpers.js";
-import { convertSlotListToTimestamptzList, unpackUserInfo, generateEventSlotTimes } from "./shared_helpers.js";
+import { convertSlotListToTimestamptzList, unpackUserInfo, generateEventSlotTimes, OFFSET_BOX_COUNT } from "./shared_helpers.js";
 
 import { supabase } from "./supabaseClient.js";
 
@@ -32,11 +32,11 @@ async function setupPage() {
   var availabilityButton = document.getElementById("availability-submit-button");
   availabilityButton.addEventListener("click", onAvailabilitySubmitClicked);
 
+  // unhide page
+  document.getElementById('view-event').classList.remove('hidden');
   refreshAvailabilityBox();
   populateTimezoneDropdown();
 
-  // unhide page
-  document.getElementById('view-event').classList.remove('hidden');
 }
 
 await setupPage();
@@ -276,5 +276,6 @@ function drawNowOutline(tracksContainer) {
   tracksContainer.appendChild(outlineElement);
 
   var scrollArea = document.getElementById("availability-scroll-area");
-  scrollArea.scrollLeft = matchingBox.offsetLeft - 200;
+  var boxesToShowBeforeNow = OFFSET_BOX_COUNT;          // 4 boxes x 30 min = 2 hour
+  scrollArea.scrollLeft = matchingBox.offsetLeft - boxesToShowBeforeNow * matchingBox.offsetWidth;
 }

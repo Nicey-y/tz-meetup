@@ -4,6 +4,7 @@ import { appState } from "./state.js";
 // TIME HELPERS
 // =====================================================
 var HALF_HOUR_IN_MS = 30 * 60 * 1000;
+export var OFFSET_BOX_COUNT = 4;
 
 function getTimeParts(utcMilliseconds, timezone) {
   // Converts a moment in time into the clock values in the given timezone.
@@ -170,9 +171,13 @@ export function buildSpanView(containerElement, timezone, selectedLookup, isEdit
 }
 
 function scrollToCurrentWindow(containerElement, currentWindowStart) {
-  // PLACEHOLDER: find the box whose data-slot-time equals currentWindowStart
-  // and set containerElement.scrollLeft so that box is visible.
-  // If the current time is outside the event range, scroll to the start (scrollLeft = 0).
+  var matchingBox = containerElement.querySelector(
+    '[data-slot-time="' + currentWindowStart + '"]'
+  );
+  if (matchingBox === null) {
+    return;
+  }
+  containerElement.scrollLeft = matchingBox.offsetLeft - OFFSET_BOX_COUNT * matchingBox.offsetWidth;
 }
 
 function onSlotClicked(clickEvent) {

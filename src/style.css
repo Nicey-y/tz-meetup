@@ -63,6 +63,7 @@ h1 {
 .span-track {
   display: flex;
   width: max-content;
+  position: relative;
 }
 
 .slot-column {
