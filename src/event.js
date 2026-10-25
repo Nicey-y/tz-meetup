@@ -139,11 +139,14 @@ async function onLoginSubmitClicked() {
 
   if (response.error !== null) {
     console.log('Failed at log in: ' + response.error.message);
+    var message = '';
     if (response.error.message.includes('username_length')) {
-      document.querySelector(".login-error-message").innerHTML = 'Username must be between 1 and 50 characters.';  
+      message = 'Username must be between 1 and 50 characters.';  
     } else {
-      document.querySelector(".login-error-message").innerHTML = response.error.message;
+      message = response.error.message;
     }
+    document.querySelector(".login-error-message").classList.remove('hidden');
+    document.querySelector(".login-error-message").innerHTML = `<div class="notice-text">${message}</div>`;
     return;
   }
   console.log('Success at log in:\n' + response.data);

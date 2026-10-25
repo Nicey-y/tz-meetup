@@ -44,6 +44,7 @@ async function saveEventToDatabase(eventName, startDate, endDate) {
   // "error" (empty when everything worked) and "data" (whatever the function returned)
   if (response.error !== null) {
     console.log("Saving failed: " + response.error.message);
+    document.querySelector('.error-message').classList.remove('hidden');
     if (response.error.message.includes("event_name_length")) {
       document.querySelector(".error-message").innerHTML = 'Event name must have between 1 and 50 characters.';
     } else if (response.error.message.includes("invalid input syntax for type date: \"\"")) {

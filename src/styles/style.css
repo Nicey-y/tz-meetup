@@ -1,0 +1,29 @@
+@font-face {
+  font-family: Ticketing;
+  src: url(TICKETING/Ticketing.otf);
+}
+
+body {
+	font-family: Ticketing;
+  font-size: 17px;
+  letter-spacing: 2px;
+  font-weight: 50;
+}
+
+button, input, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+h1 {
+  text-align: center;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.title-404 {
+  text-align: center;
+}
+

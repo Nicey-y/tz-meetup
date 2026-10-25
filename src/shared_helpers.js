@@ -54,7 +54,7 @@ export function getUtcOffsetLabel(timezone) {
 
   for (var i = 0; i < partsList.length; i++) {
     if (partsList[i].type === "timeZoneName") {
-      return partsList[i].value;
+      return partsList[i].value.replace("GMT", "UTC");
     }
   }
   return "";

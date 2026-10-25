@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <title>TZ Meetup | Cross-timezone event scheduling</title>
-  <link rel="stylesheet" href="/src/style.css">
+  <link rel="stylesheet" href="/src/styles/style.css">
+  <link rel="stylesheet" href="/src/styles/event.css">
 </head>
 <body>
   <!-- ========== VIEW 2, 3, 4: the event page ========== -->
@@ -25,29 +26,34 @@
     </div>
 
     <!-- view 2: user not logged in yet -->
-    <div id="login-section">
+    <div id="login-section" class="login-section">
       <div class="form-row">
         <label for="username-input">Name</label>
         <input type="text" id="username-input">
       </div>
 
-      <div class="form-row">
+      <div class="form-row top-aligned">
         <label for="timezone-select">
-          Timezone <small>(leave empty for auto detect)</small>
+          Timezone
+          <br> 
+          <small>(leave empty for autodetect)</small>
         </label>
-        <select id="timezone-select">
+        <select id="timezone-select" class="timezone-select">
           <option value="">-- auto detect --</option>
           <!-- other options are added by populateTimezoneDropdown() -->
         </select>
       </div>
 
-      <div class="login-error-message"></div>
+      <div class="login-error-message hidden"></div>
 
-      <button id="login-submit-button">SUBMIT</button>
+      <div class="form-button">
+        <button id="login-submit-button">SUBMIT</button>
+      </div>
+
     </div>
 
     <!-- view 3 and 4: user is logged in, this is their editable row -->
-    <div id="input-section" class="hidden">
+    <div id="input-section" class="input-section hidden">
       <p>Click to choose your available time slot</p>
 
       <div class="user-row">
