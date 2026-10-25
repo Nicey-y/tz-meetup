@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>TZ Meetup | Cross-timezone event scheduling</title>
+  <script type="module" crossorigin src="/tz-meetup/assets/main-BN0jM94M.js"></script>
+  <link rel="modulepreload" crossorigin href="/tz-meetup/assets/shared_helpers-BREdycXK.js">
+  <link rel="stylesheet" crossorigin href="/tz-meetup/assets/shared_helpers-oCWcjffi.css">
+</head>
+<body>
+
+  <!-- ========== PAGE 1: create event (image 1) ========== -->
+  <div id="view-create">
+    <h1>Create an event</h1>
+
+    <div class="form-row">
+      <label for="event-name-input">Event Name</label>
+      <input type="text" id="event-name-input">
+    </div>
+
+    <div class="form-row">
+      <label for="start-date-input">Start Date</label>
+      <input type="date" id="start-date-input">
+    </div>
+
+    <div class="form-row">
+      <label for="end-date-input">End Date</label>
+      <input type="date" id="end-date-input">
+    </div>
+
+    <button id="create-submit-button">SUBMIT</button>
+
+    <p>
+      Choose start and end date with respect to your time zone inclusively
+      (e.g. if event can start at 9PM oct 23 and end at 3AM oct 24 your time,
+      pick oct 23 as start and oct 24 as end date)
+    </p>
+
+    <div class="error-message"></div>
+  </div>
+  
+</body>
+</html>

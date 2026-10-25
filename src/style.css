@@ -21,6 +21,10 @@ h1 {
   margin-right: 10px;
 }
 
+.title-404 {
+  text-align: center;
+}
+
 /* ---------- availability box (top grey area) ---------- */
 #availability-box {
   border: 1px solid gray;

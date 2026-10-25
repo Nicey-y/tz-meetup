@@ -46,6 +46,8 @@ async function saveEventToDatabase(eventName, startDate, endDate) {
     console.log("Saving failed: " + response.error.message);
     if (response.error.message.includes("event_name_length")) {
       document.querySelector(".error-message").innerHTML = 'Event name must have between 1 and 50 characters.';
+    } else if (response.error.message.includes("invalid input syntax for type date: \"\"")) {
+      document.querySelector(".error-message").innerHTML = 'Start and end date cannot be null.';
     } else {
       document.querySelector(".error-message").innerHTML = response.error.message;
     }

@@ -10,14 +10,17 @@ import { appState } from "./state.js";
 // =====================================================
 
 async function setupPage() {
-
   // Construct event state
   const eid = new URLSearchParams(window.location.search).get("eid");
-  if (eid === null) {
-    // TODO: show 404 page
+
+  const success = await loadAllUsersFromDatabase(eid);
+  if (success === false) {
+    // Redirect to 404
+    window.location.href = "404.html";
+    return;
   }
+
   appState.eventId = eid;
-  await loadAllUsersFromDatabase();
   appState.allSlotTimes = generateEventSlotTimes(appState.startDateTime, appState.endDateTime);
 
   // Populate screen with event info
@@ -31,6 +34,9 @@ async function setupPage() {
 
   refreshAvailabilityBox();
   populateTimezoneDropdown();
+
+  // unhide page
+  document.getElementById('view-event').classList.remove('hidden');
 }
 
 await setupPage();
@@ -54,15 +60,15 @@ async function saveAvailabilityToDatabase(user, slotTimes) {
   console.log("Saved! The function returned: ", response.data);
 }
 
-async function loadAllUsersFromDatabase() {
+async function loadAllUsersFromDatabase(eid) {
   var response = await supabase.rpc("get_event_users", {
-    p_eid: appState.eventId
+    p_eid: eid
   });
 
   if (response.error !== null) {
     console.log("Fetch event's users failed: " + response.error.message);
-    document.querySelector('.submit-availability-error-message').innerHTML = response.error.message;
-    return;
+    // document.querySelector('.submit-availability-error-message').innerHTML = response.error.message;
+    return false;
   }
 
   // response.data shape
@@ -78,12 +84,15 @@ async function loadAllUsersFromDatabase() {
 // -- }
   console.log('get_event_users responses: ', response.data);
 
+  appState.eventId = response.data.eid;
   appState.eventName = response.data.event_name;
   appState.startDateTime = response.data.start_time;
   appState.endDateTime = response.data.end_time;
 
   // Save users' info and their availability
   appState.allUsers = response.data.users.map(unpackUserInfo);
+
+  return true;
 }
 
 // =====================================================
@@ -130,7 +139,11 @@ async function onLoginSubmitClicked() {
 
   if (response.error !== null) {
     console.log('Failed at log in: ' + response.error.message);
-    document.querySelector(".login-error-message").innerHTML = response.error.message;
+    if (response.error.message.includes('username_length')) {
+      document.querySelector(".login-error-message").innerHTML = 'Username must be between 1 and 50 characters.';  
+    } else {
+      document.querySelector(".login-error-message").innerHTML = response.error.message;
+    }
     return;
   }
   console.log('Success at log in:\n' + response.data);
@@ -168,7 +181,7 @@ async function onAvailabilitySubmitClicked() {
 
   await saveAvailabilityToDatabase(appState.currentUser, selectedSlotTimes);
 
-  await loadAllUsersFromDatabase();
+  await loadAllUsersFromDatabase(appState.eventId);
   refreshAvailabilityBox();
 }
 
