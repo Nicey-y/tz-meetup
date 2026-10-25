@@ -110,12 +110,11 @@ export function getBrowserTimezone() {
 // THE SPAN VIEW (the scrollable row of 30 min boxes)
 // =====================================================
 
-export function buildSpanView(containerElement, timezone, selectedLookup, isEditable, showCurrentWindow) {
+export function buildSpanView(containerElement, timezone, selectedLookup, isEditable) {
   // Draws one scrollable row of 30 min boxes inside containerElement.
   //   timezone          -> which timezone the hour labels are shown in
   //   selectedLookup    -> which boxes are green
   //   isEditable        -> true: clicking toggles a box. false: read only
-  //   showCurrentWindow -> true: draw the black outlined box around "now"
 
   containerElement.innerHTML = "";
 
@@ -154,10 +153,6 @@ export function buildSpanView(containerElement, timezone, selectedLookup, isEdit
 
     if (selectedLookup[slotTime] === true) {
       boxElement.classList.add("selected");
-    }
-
-    if (showCurrentWindow === true && slotTime === currentWindowStart) {
-      boxElement.classList.add("current-window");
     }
 
     if (isEditable === true) {

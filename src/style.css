@@ -7,7 +7,7 @@ h1 {
 }
 
 .hidden {
-  display: none;
+  display: none !important;
 }
 
 .form-row {
@@ -91,9 +91,51 @@ h1 {
   cursor: pointer;
 }
 
-/* the box that marks the current real time 30 min window */
-.slot-box.current-window {
-  outline: 3px solid black;
-  outline-offset: -3px;
+#availability-grid {
+  display: flex;
+}
+
+/* 6px = the 1px border + 5px padding at the top of the scroll area,
+   so the info rows line up with the track rows */
+#availability-info-column {
+  padding-top: 6px;
+  margin-right: 20px;
+}
+
+.user-info-row {
+  display: flex;
+  align-items: center;
+  height: 80px;            /* must equal .track-row height */
+  margin-bottom: 10px;     /* must equal .track-row margin */
+  white-space: nowrap;
+}
+
+/* the ONE shared scroll container, so there is only one scrollbar */
+#availability-scroll-area {
+  flex: 1;
+  overflow-x: scroll;
+  border: 1px solid gray;
+  border-radius: 10px;
+  padding: 5px;
+}
+
+/* position: relative makes this the reference point for the outline's left/top */
+#availability-tracks {
+  position: relative;
+  width: max-content;
+}
+
+.track-row {
+  height: 80px;            /* 20px label + 60px box */
+  margin-bottom: 10px;
+}
+
+#now-outline {
+  position: absolute;
+  top: 0;
+  bottom: 0;               /* top and bottom stretch it over every row */
+  box-sizing: border-box;
+  border: 3px solid black;
   border-radius: 6px;
+  pointer-events: none;    /* clicks pass through it */
 }

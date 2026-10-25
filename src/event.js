@@ -13,7 +13,7 @@ async function setupPage() {
 
   // Construct event state
   const eid = new URLSearchParams(window.location.search).get("eid");
-  if (eid !== null) {
+  if (eid === null) {
     // TODO: show 404 page
   }
   appState.eventId = eid;
@@ -153,7 +153,7 @@ function showLoggedInState() {
 
   // draw the editable span view
   var spanViewElement = document.getElementById("input-span-view");
-  buildSpanView(spanViewElement, user.timezone, appState.selectedLookup, true, false);
+  buildSpanView(spanViewElement, user.timezone, appState.selectedLookup, true);
 }
 
 // =====================================================
@@ -173,30 +173,35 @@ async function onAvailabilitySubmitClicked() {
 }
 
 function refreshAvailabilityBox() {
-  // Redraws the top grey box: one read only row per user.
-  var rowsContainer = document.getElementById("availability-rows");
+  var grid = document.getElementById("availability-grid");
+  var infoColumn = document.getElementById("availability-info-column");
+  var tracksContainer = document.getElementById("availability-tracks");
   var emptyMessage = document.getElementById("no-availability-message");
 
-  rowsContainer.innerHTML = "";
+  infoColumn.innerHTML = "";
+  tracksContainer.innerHTML = "";   // remove the old outline
 
   if (appState.allUsers.length === 0) {
     emptyMessage.classList.remove("hidden");
+    grid.classList.add("hidden");
     return;
   }
 
   emptyMessage.classList.add("hidden");
+  grid.classList.remove("hidden");
 
   for (var i = 0; i < appState.allUsers.length; i++) {
-    var rowElement = buildUserRow(appState.allUsers[i]);
-    rowsContainer.appendChild(rowElement);
+    var user = appState.allUsers[i];
+    infoColumn.appendChild(buildUserInfoRow(user));
+    tracksContainer.appendChild(buildUserTrackRow(user));
   }
+
+  drawNowOutline(tracksContainer);
 }
 
-function buildUserRow(user) {
-  // Makes one read only row: timezone info, name, local time, and span view
-  // with the black "right now" highlight.
+function buildUserInfoRow(user) {
   var rowElement = document.createElement("div");
-  rowElement.className = "user-row";
+  rowElement.className = "user-info-row";
 
   var offsetCell = document.createElement("div");
   offsetCell.className = "user-info-cell";
@@ -214,22 +219,49 @@ function buildUserRow(user) {
   timeCell.className = "user-info-cell";
   timeCell.textContent = formatLocalTimeAndDate(new Date().getTime(), user.timezone);
 
-  var spanViewElement = document.createElement("div");
-  spanViewElement.className = "span-view";
+  rowElement.appendChild(offsetCell);
+  rowElement.appendChild(timezoneCell);
+  rowElement.appendChild(nameCell);
+  rowElement.appendChild(timeCell);
 
-  // turn the user's slot list into a lookup so buildSpanView can check it quickly
+  return rowElement;
+}
+
+function buildUserTrackRow(user) {
+  var trackRowElement = document.createElement("div");
+  trackRowElement.className = "track-row";
+
+  // turn the user's slot list into a lookup (same as your old code)
   var userLookup = {};
   for (var i = 0; i < user.slotTimes.length; i++) {
     userLookup[user.slotTimes[i]] = true;
   }
 
-  buildSpanView(spanViewElement, user.timezone, userLookup, false, true);
+  buildSpanView(trackRowElement, user.timezone, userLookup, false);
 
-  rowElement.appendChild(offsetCell);
-  rowElement.appendChild(timezoneCell);
-  rowElement.appendChild(nameCell);
-  rowElement.appendChild(timeCell);
-  rowElement.appendChild(spanViewElement);
+  return trackRowElement;
+}
 
-  return rowElement;
+function drawNowOutline(tracksContainer) {
+  var currentWindowStart = getCurrentWindowStartTime();
+
+  // querySelector returns the FIRST match, which is in the first row.
+  // That's fine because every row has its columns at the same x positions.
+  var matchingBox = tracksContainer.querySelector(
+    '[data-slot-time="' + currentWindowStart + '"]'
+  );
+
+  // "now" is outside the event range, so there is nothing to outline
+  if (matchingBox === null) {
+    return;
+  }
+
+  var outlineElement = document.createElement("div");
+  outlineElement.id = "now-outline";
+  outlineElement.style.left = matchingBox.offsetLeft + "px";
+  outlineElement.style.width = matchingBox.offsetWidth + "px";
+  tracksContainer.appendChild(outlineElement);
+
+  var scrollArea = document.getElementById("availability-scroll-area");
+  scrollArea.scrollLeft = matchingBox.offsetLeft - 200;
 }
