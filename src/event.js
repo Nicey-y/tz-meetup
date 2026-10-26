@@ -170,6 +170,8 @@ function showLoggedInState() {
   // draw the editable span view
   var spanViewElement = document.getElementById("input-span-view");
   buildSpanView(spanViewElement, user.timezone, appState.selectedLookup, true);
+
+  document.getElementById("input-username").title = user.name;
 }
 
 // =====================================================
@@ -216,29 +218,38 @@ function refreshAvailabilityBox() {
 }
 
 function buildUserInfoRow(user) {
+  var userFullRowElement = document.createElement("div");
+  userFullRowElement.className = "user-row";
+  
   var rowElement = document.createElement("div");
   rowElement.className = "user-info-row";
 
   var offsetCell = document.createElement("div");
   offsetCell.className = "user-info-cell";
   offsetCell.textContent = getUtcOffsetLabel(user.timezone);
+  offsetCell.title = offsetCell.textContent;
 
   var timezoneCell = document.createElement("div");
   timezoneCell.className = "user-info-cell";
   timezoneCell.textContent = user.timezone;
+  timezoneCell.title = timezoneCell.textContent;
 
   var nameCell = document.createElement("div");
   nameCell.className = "user-info-cell";
   nameCell.textContent = user.name;
+  nameCell.title = nameCell.textContent;
 
   var timeCell = document.createElement("div");
   timeCell.className = "user-info-cell";
   timeCell.textContent = formatLocalTimeAndDate(new Date().getTime(), user.timezone);
+  timeCell.title = timeCell.textContent;
 
   rowElement.appendChild(offsetCell);
   rowElement.appendChild(timezoneCell);
   rowElement.appendChild(nameCell);
   rowElement.appendChild(timeCell);
+
+  userFullRowElement.appendChild(rowElement);
 
   return rowElement;
 }

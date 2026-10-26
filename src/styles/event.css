@@ -1,3 +1,8 @@
+:root {
+  --info-columns: minmax(0, 9fr) minmax(0, 22fr) minmax(0, 14fr) minmax(0, 12fr);
+  --info-width: min(50vw, calc(63ch + 60px));
+}
+
 /* ---------- log in box ----------*/
 .login-section {
   padding-left: 5vw;
@@ -69,9 +74,31 @@ button {
   margin-bottom: 10px;
 }
 
+.user-info-row {
+  display: grid;
+  grid-template-columns: var(--info-columns);
+  column-gap: 20px;
+  align-items: center;
+  height: 80px;            /* must still equal .track-row height */
+  margin-bottom: 10px;     /* must still equal .track-row margin */
+  /* DELETE the old "white-space: nowrap;" line, it prevents wrapping */
+}
+
 .user-info-cell {
-  margin-right: 20px;
-  min-width: 80px;
+  text-align: left;
+  overflow: hidden;
+  overflow-wrap: anywhere;          /* lets one long word, like a username, break */
+  display: -webkit-box;             /* these three lines clamp the text to 3 lines */
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  /* DELETE the old min-width and margin-right lines */
+}
+
+.user-row .user-info-row {
+  width: var(--info-width);
+  margin-right: 20px;       /* same gap as the top section */
+  flex-shrink: 0;
 }
 
 /* ---------- the horizontally scrollable span view ---------- */
@@ -128,14 +155,21 @@ button {
 #availability-info-column {
   padding-top: 6px;
   margin-right: 20px;
+  width: var(--info-width);
+  flex-shrink: 0;
+
+  display: grid;
+  /* offset | timezone name | username | local time */
+  grid-template-columns: var(--info-columns);
+  grid-auto-rows: 80px;     /* must equal .track-row height */
+  row-gap: 10px;            /* must equal .track-row margin-bottom */
+  column-gap: 20px;
+  align-items: center;
 }
 
-.user-info-row {
-  display: flex;
-  align-items: center;
-  height: 80px;            /* must equal .track-row height */
-  margin-bottom: 10px;     /* must equal .track-row margin */
-  white-space: nowrap;
+/* the row wrappers stop being boxes, so their cells become items of the grid above */
+#availability-info-column .user-info-row {
+  display: contents;
 }
 
 /* the ONE shared scroll container, so there is only one scrollbar */
@@ -170,5 +204,52 @@ button {
 
 /* -------------- input section ------------ */
 .input-section {
-	padding-left: 5vw;
+  padding-left: calc(2vw + 11px);
+  padding-right: calc(2vw + 11px);
+}
+
+@media (max-width: 900px) {
+  :root {
+    --info-columns: minmax(0, 1fr) minmax(0, 1fr);   /* 2 cells per line */
+    --info-width: 100%;
+  }
+
+  /* top box: all user info first, then all the spans */
+  #availability-grid {
+    flex-direction: column;
+  }
+
+  #availability-info-column {
+    margin-right: 0;
+    margin-bottom: 15px;
+    padding-top: 0;
+    grid-auto-rows: auto;      /* rows fit their text instead of a fixed 80px */
+    row-gap: 4px;
+  }
+
+  /* a thin separator above each user (cells 1 and 2 are a user's first line) */
+  #availability-info-column .user-info-cell:nth-child(-n+2) {
+    border-top: 1px solid #bbb;
+    padding-top: 6px;
+    margin-top: 6px;
+  }
+
+  #availability-scroll-area {
+    flex: none;
+  }
+
+  /* bottom input: user info above, time slots below */
+  .user-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .user-row .user-info-row {
+    margin-right: 0;
+    margin-bottom: 10px;
+  }
+
+  .user-row .span-view {
+    flex: none;
+  }
 }
