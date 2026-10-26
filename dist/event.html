@@ -2,20 +2,22 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>TZ Meetup | Cross-timezone event scheduling</title>
-  <script type="module" crossorigin src="/tz-meetup/assets/event-JAvifwRw.js"></script>
-  <link rel="modulepreload" crossorigin href="/tz-meetup/assets/shared_helpers-BREdycXK.js">
-  <link rel="stylesheet" crossorigin href="/tz-meetup/assets/shared_helpers-oCWcjffi.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TZ Meetup | Cross-timezone event scheduling</title>
+  <script type="module" crossorigin src="/tz-meetup/assets/event-BpfZMlQn.js"></script>
+  <link rel="modulepreload" crossorigin href="/tz-meetup/assets/shared_helpers-Cateu3Q9.js">
+  <link rel="stylesheet" crossorigin href="/tz-meetup/assets/shared_helpers-B2fg1Sdp.css">
+  <link rel="stylesheet" crossorigin href="/tz-meetup/assets/event-DYr932Bk.css">
 </head>
 <body>
-  <!-- ========== PAGES 2, 3, 4: the event page ========== -->
+  <!-- ========== VIEW 2, 3, 4: the event page ========== -->
   <div id="view-event" class="hidden">
 
     <h1 id="event-title"></h1>
 
     <!-- availability box: shown in all 3 states.
-         image 2 and 3: shows the empty message
-         image 4: shows one row per user who submitted -->
+      view 2 and 3: shows the empty message
+      view 4: shows one row per user who submitted -->
     <div id="availability-box">
       <p id="no-availability-message">No availability added yet</p>
       <div id="availability-grid">
@@ -26,37 +28,44 @@
       </div>
     </div>
 
-    <!-- image 2: user not logged in yet -->
-    <div id="login-section">
+    <!-- view 2: user not logged in yet -->
+    <div id="login-section" class="login-section">
       <div class="form-row">
         <label for="username-input">Name</label>
         <input type="text" id="username-input">
       </div>
 
-      <div class="form-row">
+      <div class="form-row top-aligned">
         <label for="timezone-select">
-          Timezone <small>(leave empty for auto detect)</small>
+          Timezone
+          <br> 
+          <small>(leave empty for autodetect)</small>
         </label>
-        <select id="timezone-select">
+        <select id="timezone-select" class="timezone-select">
           <option value="">-- auto detect --</option>
           <!-- other options are added by populateTimezoneDropdown() -->
         </select>
       </div>
 
-      <div class="login-error-message"></div>
+      <div class="login-error-message hidden"></div>
 
-      <button id="login-submit-button">SUBMIT</button>
+      <div class="form-button">
+        <button id="login-submit-button">SUBMIT</button>
+      </div>
+
     </div>
 
-    <!-- image 3 and 4: user is logged in, this is their editable row -->
-    <div id="input-section" class="hidden">
+    <!-- view 3 and 4: user is logged in, this is their editable row -->
+    <div id="input-section" class="input-section hidden">
       <p>Click to choose your available time slot</p>
 
       <div class="user-row">
-        <div class="user-info-cell" id="input-tz-offset"></div>
-        <div class="user-info-cell" id="input-tz-name"></div>
-        <div class="user-info-cell" id="input-username"></div>
-        <div class="user-info-cell" id="input-local-time"></div>
+        <div class="user-info-row">
+          <div class="user-info-cell" id="input-tz-offset"></div>
+          <div class="user-info-cell" id="input-tz-name"></div>
+          <div class="user-info-cell" id="input-username"></div>
+          <div class="user-info-cell" id="input-local-time"></div>
+        </div>
         <div class="span-view" id="input-span-view"></div>
       </div>
 
