@@ -184,8 +184,6 @@ function onSlotClicked(clickEvent) {
   // click a box to select, click again to deselect
   var clickedBox = clickEvent.currentTarget;
   var slotTime = clickedBox.getAttribute("data-slot-time");
-  console.log(slotTime);
-  console.log(appState);
 
   if (appState.selectedLookup[slotTime] === true) {
     delete appState.selectedLookup[slotTime];
