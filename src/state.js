@@ -11,5 +11,5 @@ export var appState = {
   currentUser: null,        // {name: "david123", timezone: "Africa/Cairo"}
   allSlotTimes: [],         // list of UTC milliseconds, one per 30 min window of the event
   selectedLookup: {},       // {"1761260400000": true} -> slots the current user picked
-  allUsers: []              // [{name, timezone, slotTimes: [..]}] loaded from database
+  allUsers: []              // [{name, timezone, slotTimes: [1761260400000,...]}] loaded from database
 };

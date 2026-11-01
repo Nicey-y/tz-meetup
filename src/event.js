@@ -32,11 +32,21 @@ async function setupPage() {
   var availabilityButton = document.getElementById("availability-submit-button");
   availabilityButton.addEventListener("click", onAvailabilitySubmitClicked);
 
+  document.getElementById("not-you-link").addEventListener("click", onNotYouClicked);
+
   // unhide page
   document.getElementById('view-event').classList.remove('hidden');
   refreshAvailabilityBox();
   populateTimezoneDropdown();
 
+  // Attempt to read user login info from localStorage
+  var savedLogin = loadLoginFromStorage();
+  if (savedLogin !== null) {
+    var restored = await logInUser(savedLogin.name, savedLogin.timezone);
+    if (restored === false) {
+      clearLoginFromStorage();   // the saved login no longer works, so forget it
+    }
+  }
 }
 
 await setupPage();
@@ -89,7 +99,7 @@ async function loadAllUsersFromDatabase(eid) {
   appState.startDateTime = response.data.start_time;
   appState.endDateTime = response.data.end_time;
 
-  // Save users' info and their availability
+  // Save users' info and their availabilities
   appState.allUsers = response.data.users.map(unpackUserInfo);
 
   return true;
@@ -125,33 +135,10 @@ async function onLoginSubmitClicked() {
     chosenTimezone = getBrowserTimezone();   // "leave empty for auto detect"
   }
 
-  appState.currentUser = {
-    name: typedName,
-    timezone: chosenTimezone
-  };
-
-  // If the user already exists, load their old availability into appState.selectedLookup.
-  var response = await supabase.rpc("get_user_avail", {
-    p_username: appState.currentUser.name,
-    p_eid: appState.eventId,
-    p_tzinfo: appState.currentUser.timezone
-  });
-
-  if (response.error !== null) {
-    console.log('Failed at log in: ' + response.error.message);
-    var message = '';
-    if (response.error.message.includes('username_length')) {
-      message = 'Username must be between 1 and 50 characters.';  
-    } else {
-      message = response.error.message;
-    }
-    document.querySelector(".login-error-message").classList.remove('hidden');
-    document.querySelector(".login-error-message").innerHTML = `<div class="notice-text">${message}</div>`;
-    return;
+  var success = await logInUser(typedName, chosenTimezone);
+  if (success === true) {
+    saveLoginToStorage(typedName, chosenTimezone);   // remember this login
   }
-  console.log('Success at log in:\n' + response.data);
-
-  showLoggedInState();
 }
 
 function showLoggedInState() {
@@ -185,6 +172,8 @@ async function onAvailabilitySubmitClicked() {
   }
 
   await saveAvailabilityToDatabase(appState.currentUser, selectedSlotTimes);
+
+  // TODO: save to localStorage too
 
   await loadAllUsersFromDatabase(appState.eventId);
   refreshAvailabilityBox();
@@ -292,4 +281,80 @@ function drawNowOutline(tracksContainer) {
   var scrollArea = document.getElementById("availability-scroll-area");
   var boxesToShowBeforeNow = OFFSET_BOX_COUNT;          // 4 boxes x 30 min = 2 hour
   scrollArea.scrollLeft = matchingBox.offsetLeft - boxesToShowBeforeNow * matchingBox.offsetWidth;
+}
+
+// ---------------- Save user details to localStorage -------------------------
+function getLoginStorageKey() {
+  return "tz-meetup-login-" + appState.eventId;
+}
+
+function saveLoginToStorage(name, timezone) {
+  try {
+    var loginInfo = { name: name, timezone: timezone };
+    localStorage.setItem(getLoginStorageKey(), JSON.stringify(loginInfo));
+  } catch (error) {
+    console.log("Could not save login: " + error);
+  }
+}
+
+function loadLoginFromStorage() {
+  try {
+    var savedText = localStorage.getItem(getLoginStorageKey());
+    if (savedText === null) {
+      return null;
+    }
+    return JSON.parse(savedText);
+  } catch (error) {
+    console.log("Could not read saved login: " + error);
+    return null;
+  }
+}
+
+function clearLoginFromStorage() {
+  try {
+    localStorage.removeItem(getLoginStorageKey());
+  } catch (error) {
+    console.log("Could not clear login: " + error);
+  }
+}
+
+async function logInUser(name, timezone) {
+  appState.currentUser = {
+    name: name,
+    timezone: timezone
+  };
+
+  // If the user already exists, load their old availability into appState.selectedLookup.
+  var response = await supabase.rpc("get_user_avail", {
+    p_username: appState.currentUser.name,
+    p_eid: appState.eventId,
+    p_tzinfo: appState.currentUser.timezone
+  });
+
+  if (response.error !== null) {
+    console.log('Failed at log in: ' + response.error.message);
+    var message = '';
+    if (response.error.message.includes('username_length')) {
+      message = 'Username must be between 1 and 50 characters.';  
+    } else {
+      message = response.error.message;
+    }
+    document.querySelector(".login-error-message").classList.remove('hidden');
+    document.querySelector(".login-error-message").innerHTML = `<div class="notice-text">${message}</div>`;
+    return false;
+  }
+
+  console.log('Success at log in:\n' + response.data);
+
+  appState.selectedLookup = 
+
+  showLoggedInState();
+
+  return true;
+}
+
+function onNotYouClicked(clickEvent) {
+  clickEvent.preventDefault();      // stops the "#" link from scrolling the page
+  clearLoginFromStorage();
+  window.location.reload();         // page restarts with no saved login, so the form shows
 }
