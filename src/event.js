@@ -346,7 +346,22 @@ async function logInUser(name, timezone) {
 
   console.log('Success at log in:\n' + response.data);
 
-  appState.selectedLookup = 
+  // Load user info
+  appState.selectedLookup = {};
+
+  var foundUser = null;
+  for (let i = 0; i < appState.allUsers.length; i++) {
+    if (appState.allUsers[i].name === name) {
+      foundUser = appState.allUsers[i];
+    }
+  }
+
+  // only existing users have slot(s) to copy
+  if (foundUser !== null) {
+    for (var j = 0; j < foundUser.slotTimes.length; j++) {
+      appState.selectedLookup[foundUser.slotTimes[j]] = true;
+    }
+  }
 
   showLoggedInState();
 
